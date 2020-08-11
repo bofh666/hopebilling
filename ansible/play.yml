@@ -105,7 +105,6 @@
 
 - name: Create virtual host for HopeBilling on nginx reverse proxy
   hosts: proxy
-  gather_facts: no
   tasks:
     - name: Generating virtual host configuration
       template:
