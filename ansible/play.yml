@@ -1,5 +1,5 @@
 ---
-- name: Ensure Python is in place
+- name: Ensure Python is in place on CentOS 8 host
   hosts: hopebilling
   gather_facts: no
   strategy: linear
@@ -92,18 +92,34 @@
         owner: apache
     - name: Adding info.php for debug
       copy:
-        content: '<?php phpinfo(); ?>\n'
+        content: '<?php phpinfo(); ?>/n'
         dest: /var/www/html/info.php
         group: apache
         owner: apache        
 
-#### 0. Положить на прокс ключ от ансибла
-#### 1. Докинуть конфигу нджинкса из темплейта на прокс
-#### 2. Сделать симлинк с проверкой nginx -t
-#### 2. Релоадить нджинкс на проксе
-
   handlers:
     - name: Restart MySQL
       systemd:
-        name: mysqld
+        unit: mysqld
         state: restarted 
+
+- name: Create virtual host for HopeBilling on nginx reverse proxy
+  hosts: proxy
+  gather_facts: no
+  tasks:
+    - name: TEST
+      debug:
+        msg: "{{ ansible_host }} and {{ ansible_nodename }}"
+      ignore_errors: yes
+    - name: Generating virutal host configuration
+      template:
+        src: hopebilling.conf.j2
+        dest: /etc/nginx/sites-available/{{ ansible_host }}
+
+    # - name: Generating virutal host configuration
+    # - name: Creating Debian-style symlink
+  hadlers:
+    - name: Reload nginx
+      systemd:
+        unit: nginx
+        state: reloaded
