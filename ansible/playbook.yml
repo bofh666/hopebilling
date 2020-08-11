@@ -93,7 +93,7 @@
         owner: apache
     - name: Adding info.php for debug
       copy:
-        content: "<?php phpinfo(); ?>/n"
+        content: <?php phpinfo(); ?>
         dest: /var/www/html/info.php
         group: apache
         owner: apache        
