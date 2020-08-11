@@ -7,9 +7,9 @@
     - raw: dnf -y install python36   # Python 3.8 won't work! It's CentOS 8 specific at the moment of writing
     - raw: alternatives --set python /usr/bin/python3
 
-- name: Install Hopebilling on CentOS 8 host
+- name: Install HopeBilling on CentOS 8 host
   hosts: hopebilling
-#  gather_facts: no
+  gather_facts: no
   vars:
     percona_repo_url: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     percona_mysql_release: ps80
@@ -20,14 +20,17 @@
           32616363323465363433353465336239633761346635376533376136666330616237613866653263
           6430306434333266640a326361313664383537343538363963646364336165353637656437363837
           64623564306537373038616364376235306330363434626535666565663839353531
-    remi_repo_url: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
-    remi_php_release: php74
   tasks:
     - name: Installing Apache2
       dnf:
         name: httpd
         state: present
         update_cache: yes
+    - name: Ensuring Apache2 is enabled and started
+      systemd:
+        unit: httpd
+        state: started
+        enabled: yes
  
     - name: Adding Percona repos
       dnf:
@@ -51,7 +54,7 @@
       command: mysql -u root -p'{{ percona_mysql_generated_password.stdout }}' --connect-expired-password -e "SET PASSWORD = '{{ percona_mysql_root_password }}'"
       no_log: yes
       ignore_errors: yes
-    - name: Enabling passwordless MySQL login for root
+    - name: Enabling passwordless MySQL root login for system root user
       template:
         src: .my.cnf.j2
         dest: /root/.my.cnf
@@ -64,20 +67,21 @@
         dest: /etc/my.cnf
       notify: Restart MySQL
 
-    # - name: Adding REMI repos
-    #   dnf:
-    #     name: "{{ remi_repo_url }}"
-    #     state: present
-    # - name: Enabling requred Percona repo
+    - name: Enabling remi-7.4 stream of dnf php module
+      shell: dnf module reset php && dnf module install php:remi-7.4
+    - name: Installing PHP 7.4 and required modules
+      debug:
+        msg: Installing PHP 7.4 and required modules
 
-#    - name: Install Percona MySQL
-#    - name: Install Apache 2
-#    - name: Install PHP 7.4 with modules
-#    - name: Configure MySQL pool size
-#    - name: Ensure MySQL and Apache are enabled and started
-#    - name: Set MySQL root password
-#    - name: Create ~/.my.cnf
-#    - name: Download and unpack hopebilling
+
+    - name: Download and unpack HopeBilling
+      unarchive:
+        src: https://github.com/vityabond/hopebilling/archive/master.zip
+        remote_src: yes
+        dest: /var/www/html
+        group: apache
+        owner: apache
+
   handlers:
     - name: Restart MySQL
       systemd:
