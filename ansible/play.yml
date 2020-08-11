@@ -1,0 +1,20 @@
+---
+- name: Install Hopebilling on CentOS 8 host
+  hosts: 192.168.42.110
+  gather_facts: no
+  vars:
+    my_var: null
+  tasks:
+    - ping
+#    - name: Add Pecona repo
+#    - name: Add Percona repo GPG key
+#    - name: Add REMI repo
+#    - name: Add REMI repo GPG key
+#    - name: Install Percona MySQL
+#    - name: Install Apache 2
+#    - name: Install PHP 7.4 with modules
+#    - name: Configure MySQL pool size
+#    - name: Ensure MySQL and Apache are enabled and started
+#    - name: Set MySQL root password
+#    - name: Create ~/.my.cnf
+#    - name: Download and unpack hopebilling
