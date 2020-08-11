@@ -49,6 +49,7 @@
       register: percona_mysql_generated_password
     - name: Setting MySQL root password
       command: mysql -u root -p'{{ percona_mysql_generated_password.stdout }}' --connect-expired-password -e "SET PASSWORD = '{{ percona_mysql_root_password }}'"
+      no_log: yes
       ignore_errors: yes
     - name: Enabling passwordless MySQL login for root
       template:
@@ -57,6 +58,11 @@
         owner: root
         group: root
         mode: 0600
+    - name: Updating MySQL default configuration
+      template:
+        src: my.cnf.j2
+        dest: /etc/my.cnf
+      notify: Restart MySQL
 
     # - name: Adding REMI repos
     #   dnf:
