@@ -79,6 +79,10 @@
         msg: Installing PHP 7.4 and required modules
 
 
+    - name: Ensure unzip is in place
+      dnf:
+        name: unzip
+        state: present
     - name: Download and unpack HopeBilling
       unarchive:
         src: https://github.com/vityabond/hopebilling/archive/master.zip
@@ -93,7 +97,9 @@
         group: apache
         owner: apache        
 
+#### 0. Положить на прокс ключ от ансибла
 #### 1. Докинуть конфигу нджинкса из темплейта на прокс
+#### 2. Сделать симлинк с проверкой nginx -t
 #### 2. Релоадить нджинкс на проксе
 
   handlers:
