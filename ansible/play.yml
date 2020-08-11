@@ -1,6 +1,6 @@
 ---
 - name: Install Hopebilling on CentOS 8 host
-  hosts: 192.168.42.110
+  hosts: hopebilling
   gather_facts: no
   vars:
     my_var: null
