@@ -4,12 +4,12 @@
   gather_facts: no
   strategy: linear
   tasks:
-    - raw: dnf -y install python38 python3-dnf
+    - raw: dnf -y install python38
     - raw: alternatives --set python /usr/bin/python3
 
 - name: Install Hopebilling on CentOS 8 host
   hosts: hopebilling
-  gather_facts: no
+#  gather_facts: no
   vars:
     percona_repo_url: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     percona_mysql_release: ps80
@@ -17,11 +17,11 @@
     remi_php_release: php74
   tasks:
     - name: Adding Percona repo
-      dnf:
+      package:
         name: "{{ percona_repo_url }}"
         state: present
     - name: Adding REMI repo
-      dnf:
+      package:
         name: "{{ remi_repo_url }}"
         state: present
 
