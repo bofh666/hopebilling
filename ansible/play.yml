@@ -20,11 +20,12 @@
       package:
         name: "{{ percona_repo_url }}"
         state: present
+        use: dnf
     - name: Adding REMI repo
       package:
         name: "{{ remi_repo_url }}"
         state: present
-
+        use: dnf
 
         #    - name: Add REMI repo
 #    - name: Add REMI repo GPG key
