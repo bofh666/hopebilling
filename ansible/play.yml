@@ -48,7 +48,7 @@
       shell: grep generated /var/log/mysqld.log | awk '{ print $NF }'
       register: percona_mysql_generated_password
     - name: Setting MySQL root password
-      command: mysql -u root -p{{ percona_mysql_generated_password.stdout }} --connect-expired-password -e "SET PASSWORD = PASSWORD('{{ percona_mysql_root_password }}')"
+      command: mysql -u root -p'{{ percona_mysql_generated_password.stdout }}' --connect-expired-password -e "SET PASSWORD = '{{ percona_mysql_root_password }}'"
       ignore_errors: yes
     - name: Enabling passwordless MySQL login for root
       template:
