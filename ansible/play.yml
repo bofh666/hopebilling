@@ -9,7 +9,6 @@
 
 - name: Install HopeBilling on CentOS 8 host
   hosts: hopebilling
-  gather_facts: no
   vars:
     percona_repo_url: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     percona_mysql_release: ps80
