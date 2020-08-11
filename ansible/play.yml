@@ -5,7 +5,8 @@
   vars:
     my_var: null
   tasks:
-    - ping
+    - debug:
+        msg: ZHOPA
 #    - name: Add Pecona repo
 #    - name: Add Percona repo GPG key
 #    - name: Add REMI repo
