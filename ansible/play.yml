@@ -107,14 +107,10 @@
   hosts: proxy
   gather_facts: no
   tasks:
-    - name: TEST
-      debug:
-        msg: "{{ ansible_host }} and {{ ansible_nodename }}"
-      ignore_errors: yes
-    - name: Generating virutal host configuration
+    - name: Generating virtual host configuration
       template:
         src: hopebilling.conf.j2
-        dest: /etc/nginx/sites-available/{{ ansible_host }}
+        dest: /etc/nginx/sites-available/{{ ansible_nodename }}
 
     # - name: Generating virutal host configuration
     # - name: Creating Debian-style symlink
