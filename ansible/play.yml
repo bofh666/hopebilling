@@ -4,7 +4,7 @@
   gather_facts: no
   strategy: linear
   tasks:
-    - raw: dnf -y install python36
+    - raw: dnf -y install python36   # Python 3.8 won't work! It's CentOS 8 specific at the moment of writing
     - raw: alternatives --set python /usr/bin/python3
 
 - name: Install Hopebilling on CentOS 8 host
@@ -13,22 +13,57 @@
   vars:
     percona_repo_url: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     percona_mysql_release: ps80
+    percona_mysql_root_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          65333764656262386466633538636233333234356364666333346666666336323164663164663832
+          3036323639396564656235653839623131326132633431640a336139646431623438386466316633
+          32616363323465363433353465336239633761346635376533376136666330616237613866653263
+          6430306434333266640a326361313664383537343538363963646364336165353637656437363837
+          64623564306537373038616364376235306330363434626535666565663839353531
     remi_repo_url: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
     remi_php_release: php74
   tasks:
-    - name: Adding Percona repo
-      package:
+    - name: Installing Apache2
+      dnf:
+        name: httpd
+        state: present
+        update_cache: yes
+ 
+    - name: Adding Percona repos
+      dnf:
         name: "{{ percona_repo_url }}"
         state: present
-        use: dnf
-    - name: Adding REMI repo
-      package:
-        name: "{{ remi_repo_url }}"
+    - name: Enabling Percona MySQL server 8.0 repo
+      command: percona-release setup -y {{ percona_mysql_release }}
+    - name: Installing Percona MySQL server 8.0
+      dnf:
+        name: percona-server-server
         state: present
-        use: dnf
+    - name: Enabling and starting Percona MySQL server 8.0 for the first time to get generated root password
+      systemd:
+        unit: mysqld
+        state: started
+        enabled: yes
+    - name: Getting generated root password
+      shell: grep generated /var/log/mysqld.log | awk '{ print $NF }'
+      register: percona_mysql_generated_password
+    - name: Setting MySQL root password
+      command: mysql -u root -p{{ percona_mysql_generated_password.stdout }} --connect-expired-password -e "SET PASSWORD = PASSWORD('{{ percona_mysql_root_password }}')"
+      ignore_errors: yes
+    - name: Enabling passwordless MySQL login for root
+      template:
+        src: .my.cnf.j2
+        dest: /root/.my.cnf
+        owner: root
+        group: root
+        mode: 0600
 
-        #    - name: Add REMI repo
-#    - name: Add REMI repo GPG key
+    # - name: Adding REMI repos
+    #   dnf:
+    #     name: "{{ remi_repo_url }}"
+    #     state: present
+    # - name: Enabling requred Percona repo
+
 #    - name: Install Percona MySQL
 #    - name: Install Apache 2
 #    - name: Install PHP 7.4 with modules
