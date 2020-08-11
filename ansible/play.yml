@@ -3,13 +3,22 @@
   hosts: hopebilling
   gather_facts: no
   vars:
-    my_var: null
+    percona_repo_url: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    percona_release: ps80
+    remi_repo_url: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+    remi_release: php74
   tasks:
     - debug:
         msg: ZHOPA
-#    - name: Add Pecona repo
-#    - name: Add Percona repo GPG key
-#    - name: Add REMI repo
+    - name: Adding Percona repo
+      dnf:
+        name: "{{ percona_repo_url }}"
+        state: present
+    - name: Adding REMI repo
+      dnf:
+        name: "{{ remi_repo_url }}"
+        state: present
+        #    - name: Add REMI repo
 #    - name: Add REMI repo GPG key
 #    - name: Install Percona MySQL
 #    - name: Install Apache 2
