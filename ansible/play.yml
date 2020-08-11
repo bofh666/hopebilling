@@ -78,3 +78,8 @@
 #    - name: Set MySQL root password
 #    - name: Create ~/.my.cnf
 #    - name: Download and unpack hopebilling
+  handlers:
+    - name: Restart MySQL
+      systemd:
+        name: mysqld
+        state: restarted 
