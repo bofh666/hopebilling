@@ -118,7 +118,7 @@
 
     # - name: Generating virutal host configuration
     # - name: Creating Debian-style symlink
-  hadlers:
+  handlers:
     - name: Reload nginx
       systemd:
         unit: nginx
