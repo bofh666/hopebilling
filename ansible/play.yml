@@ -5,6 +5,7 @@
   strategy: linear
   tasks:
     - raw: dnf -y install python38
+    - raw: alternatives --set python /usr/bin/python3
 
 - name: Install Hopebilling on CentOS 8 host
   hosts: hopebilling
