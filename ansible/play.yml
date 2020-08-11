@@ -87,12 +87,13 @@
       unarchive:
         src: https://github.com/vityabond/hopebilling/archive/master.zip
         remote_src: yes
+        creates: /var/www/html/hopebilling-master
         dest: /var/www/html
         group: apache
         owner: apache
     - name: Adding info.php for debug
       copy:
-        content: '<?php phpinfo(); ?>/n'
+        content: <?php phpinfo(); ?>/n
         dest: /var/www/html/info.php
         group: apache
         owner: apache        
@@ -110,11 +111,15 @@
       template:
         src: hopebilling.conf.j2
         dest: /etc/nginx/sites-available/{{ ansible_nodename }}
-
+####### В темплейт нужно подсовывать факты от хоста с биллингом, а для названия сертификата брать нулевой элемент массива из днс серч
     # - name: Generating virutal host configuration
-    # - name: Creating Debian-style symlink
+    # - name: Creating Debian-style symlink с чеком -- если норм, то нотифаем релоад нджинкса 
   handlers:
     - name: Reload nginx
       systemd:
         unit: nginx
         state: reloaded
+
+
+###### когда допилю нджинкс, надо будет разобраться с пхп модулями, чтобы апач стал подтягивать пхп как нужно без всяких пхп-фпм
+###### сделать так, чтобы скачанный биллинг нормально распаковывался (или симлинкался?) в /var/www/html
