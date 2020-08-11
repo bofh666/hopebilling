@@ -73,7 +73,7 @@
         name: "{{ remi_release_url }}"
         state: present
     - name: Enabling remi-7.4 stream of dnf php module
-      shell: dnf module reset php && dnf module install -y php:remi-{{ remi_php_release }}
+      shell: dnf module reset -y php && dnf module install -y php:remi-{{ remi_php_release }}
     - name: Installing PHP 7.4 and required modules
       debug:
         msg: Installing PHP 7.4 and required modules
