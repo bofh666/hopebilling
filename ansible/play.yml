@@ -10,7 +10,7 @@
 - name: Install HopeBilling on CentOS 8 host
   hosts: hopebilling
   vars:
-    percona_repo_url: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    percona_release_url: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     percona_mysql_release: ps80
     percona_mysql_root_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
@@ -19,6 +19,8 @@
           32616363323465363433353465336239633761346635376533376136666330616237613866653263
           6430306434333266640a326361313664383537343538363963646364336165353637656437363837
           64623564306537373038616364376235306330363434626535666565663839353531
+    remi_release_url: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+    remi_php_release: 7.4
   tasks:
     - name: Installing Apache2
       dnf:
@@ -33,7 +35,7 @@
  
     - name: Adding Percona repos
       dnf:
-        name: "{{ percona_repo_url }}"
+        name: "{{ percona_release_url }}"
         state: present
     - name: Enabling Percona MySQL server 8.0 repo
       command: percona-release setup -y {{ percona_mysql_release }}
@@ -66,8 +68,12 @@
         dest: /etc/my.cnf
       notify: Restart MySQL
 
+    - name: Adding REMI repos
+      dnf:
+        name: "{{ remi_release_url }}"
+        state: present
     - name: Enabling remi-7.4 stream of dnf php module
-      shell: dnf module reset php && dnf module install php:remi-7.4
+      shell: dnf module reset php && dnf module install -y php:remi-{{ remi_php_release }}
     - name: Installing PHP 7.4 and required modules
       debug:
         msg: Installing PHP 7.4 and required modules
@@ -80,6 +86,15 @@
         dest: /var/www/html
         group: apache
         owner: apache
+    - name: Adding info.php for debug
+      copy:
+        content: '<?php phpinfo(); ?>\n'
+        dest: /var/www/html/info.php
+        group: apache
+        owner: apache        
+
+#### 1. Докинуть конфигу нджинкса из темплейта на прокс
+#### 2. Релоадить нджинкс на проксе
 
   handlers:
     - name: Restart MySQL
