@@ -92,6 +92,7 @@
           - php-pdo
           - php-gd
           - php-soap
+          - php-mysqlnd
         state: present
 
     - name: Ensuring unzip is in place
@@ -103,6 +104,7 @@
         src: https://github.com/vityabond/hopebilling/archive/master.zip
         remote_src: yes
         dest: /var/www
+        keep_newer: yes
         group: apache
         owner: apache
     - name: Weird fix for weird thing
