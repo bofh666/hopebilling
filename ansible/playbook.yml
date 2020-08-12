@@ -108,16 +108,17 @@
   hosts: proxy
   gather_facts: no
   tasks:
-    # - name: Generating virtual host configuration
-    #   template:
-    #     src: hopebilling.conf.j2
-    #     dest: /etc/nginx/sites-available/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
-    #   notify: Reload nginx
     - name: Creating Debian-style symlink
       file:
         src: /etc/nginx/sites-available/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
         dest: /etc/nginx/sites-enabled/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
         state: link
+        force: yes
+    - name: Generating virtual host configuration
+      template:
+        src: hopebilling.conf.j2
+        dest: /etc/nginx/sites-available/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
+      notify: Reload nginx
       
   handlers:
     - name: Reload nginx
