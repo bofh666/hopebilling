@@ -92,8 +92,7 @@
           - php-pdo
           - php-gd
           - php-soap
-        state:
-          - present
+        state: present
 
     - name: Ensuring unzip is in place
       dnf:
