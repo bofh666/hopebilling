@@ -98,10 +98,16 @@
       unarchive:
         src: https://github.com/vityabond/hopebilling/archive/master.zip
         remote_src: yes
-        creates: /var/www/html/hopebilling-master
-        dest: /var/www/html
+        creates: /var/www/hopebilling-master
+        dest: /var/www
         group: apache
         owner: apache
+    - name: Creating html symlink
+      file:
+        src: /var/www/hopebilling-master
+        dest: /var/www/html
+        state: link
+        force: yes
     - name: Adding info.php for debug
       copy:
         content: <?php phpinfo(); ?>
@@ -143,5 +149,4 @@
         state: reloaded
 
 
-###### когда допилю нджинкс, надо будет разобраться с пхп модулями, чтобы апач стал подтягивать пхп как нужно без всяких пхп-фпм
 ###### сделать так, чтобы скачанный биллинг нормально распаковывался (или симлинкался?) в /var/www/html
