@@ -108,6 +108,13 @@
         dest: /var/www/html
         state: link
         force: yes
+    - name: Enabling short_open_tag in php.ini
+      ini_file:
+        path: /etc/php.ini
+        section: PHP
+        option: short_open_tag
+        value: on
+      notify: Restart Apache2
     - name: Adding info.php for debug
       copy:
         content: <?php phpinfo(); ?>
