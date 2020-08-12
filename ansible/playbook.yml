@@ -27,11 +27,18 @@
         name: httpd
         state: present
         update_cache: yes
-    - name: Ensuring Apache2 is enabled and started
-      systemd:
-        unit: httpd
-        state: started
-        enabled: yes
+    - name: Allowing HTTP traffic
+      firewalld:
+        immediate: yes
+        offline: yes
+        permanent: yes
+        service: http
+        state: enabled
+    - name: Removing default welcome page
+      file:
+        path: /etc/httpd/conf.d/welcome.conf
+        state: absent
+      notify: Restart Apache2
 
     - name: Adding Percona repos
       dnf:
@@ -99,6 +106,11 @@
         owner: apache
 
   handlers:
+    - name: Restart Apache2
+      systemd:
+        unit: httpd
+        state: restarted
+        enabled: yes
     - name: Restart MySQL
       systemd:
         unit: mysqld
