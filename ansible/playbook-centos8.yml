@@ -109,16 +109,16 @@
       copy:
         content: ''
         dest: /var/www/hopebilling-master/app/config/global.config
-    # - name: Setting required permissions
-    #   file:
-    #     path: /var/www/hopebilling-master/{{ item }}
-    #     mode: a+w
-    #   with_items:
-    #     - app/config
-    #     - app/config/global.config
-    #     - app/config/payments.config
-    #     - app/config/sms-gateway.config
-    #     - storage
+    - name: Some SELinux magic
+      command: chcon -t httpd_sys_content_t /var/www/html -R
+    - name: Some more SELinux magic
+      command: chcon -t httpd_sys_rw_content_t /var/www/html/{{ item }}
+      with_items:
+        - app/config
+        - app/config/global.config
+        - app/config/payments.config
+        - app/config/sms-gateway.config
+        - storage
     - name: Updating Apache2 config to allow .htaccess
       replace:
         path: /etc/httpd/conf/httpd.conf
