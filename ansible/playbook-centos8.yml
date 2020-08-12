@@ -119,10 +119,11 @@
         - app/config/payments.config
         - app/config/sms-gateway.config
         - storage
-    - name: Generating Apache2 virtual host config
-      copy:
-        src: httpd.conf
-        dest: /etc/httpd/conf.d/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
+    - name: Updating Apache2 config to allow .htaccess
+      replace:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: AllowOverride None
+        replace: AllowOverride All
       notify: Restarting Apache2
     - name: Creating html symlink
       file:
