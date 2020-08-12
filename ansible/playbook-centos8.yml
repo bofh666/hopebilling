@@ -123,13 +123,13 @@
       copy:
         src: httpd.conf
         dest: /etc/httpd/conf.d/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
-      notify: Restarting Apache2 
-    # - name: Creating html symlink
-    #   file:
-    #     src: /var/www/hopebilling-master
-    #     dest: /var/www/html
-    #     state: link
-    #     force: yes
+      notify: Restarting Apache2
+    - name: Creating html symlink
+      file:
+        src: /var/www/hopebilling-master
+        dest: /var/www/html
+        state: link
+        force: yes
     - name: Enabling short_open_tag in php.ini
       lineinfile:
         path: /etc/php.ini
@@ -169,7 +169,7 @@
         src: nginx.conf.j2
         dest: /etc/nginx/sites-available/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
       notify: Reload nginx
-      
+
   handlers:
     - name: Reload nginx
       systemd:
