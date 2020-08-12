@@ -113,7 +113,7 @@
         path: /etc/php.ini
         section: PHP
         option: short_open_tag
-        value: on
+        value: "On"
       notify: Restart Apache2
     - name: Adding info.php for debug
       copy:
