@@ -34,10 +34,14 @@
         permanent: yes
         service: http
         state: enabled
-    - name: Removing default welcome page
+    - name: Removing default Apache2 configs
       file:
-        path: /etc/httpd/conf.d/welcome.conf
+        path: /etc/httpd/conf.d/{{ item }}
         state: absent
+      with_items:
+        - autoindex.conf
+        - userdir.conf
+        - welcome.conf
       notify: Restart Apache2
 
     - name: Adding Percona repos
