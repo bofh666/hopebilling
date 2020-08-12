@@ -139,12 +139,6 @@
         regexp: '^short_open_tag'
         state: absent
       notify: Restarting Apache2
-    - name: Adding info.php for debug
-      copy:
-        content: <?php phpinfo(); ?>
-        dest: /var/www/html/info.php
-        group: apache
-        owner: apache
 
   handlers:
     - name: Restarting Apache2
