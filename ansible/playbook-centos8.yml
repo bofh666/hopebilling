@@ -42,7 +42,7 @@
         - autoindex.conf
         - userdir.conf
         - welcome.conf
-      notify: Restart Apache2
+      notify: Restarting Apache2
 
     - name: Adding Percona repos
       dnf:
@@ -77,57 +77,80 @@
       template:
         src: my.cnf.j2
         dest: /etc/my.cnf
-      notify: Restart MySQL
+      notify: Restarting MySQL
 
     - name: Adding REMI repos
       dnf:
         name: "{{ remi_release_url }}"
         state: present
-    - name: Enabling remi-{{ remi_php_release }} stream of dnf php module
+    - name: Enabling remi-{{ remi_php_release }} stream of dnf php module and installing PHP {{ remi_php_release }}
       shell: dnf module reset -y php && dnf module install -y php:remi-{{ remi_php_release }} warn=False
-    - name: Installing PHP {{ remi_php_release }} and required modules
-      debug:
-        msg: Installing PHP {{ remi_php_release }} and required modules
+    - name: Installing required PHP modules
+      dnf:
+        name:
+          - php-pecl-zip
+          - php-pdo
+          - php-gd
+          - php-soap
+        state:
+          - present
 
-
-    - name: Ensure unzip is in place
+    - name: Ensuring unzip is in place
       dnf:
         name: unzip
         state: present
-    - name: Download and unpack HopeBilling
+    - name: Downloading and unpacking HopeBilling
       unarchive:
         src: https://github.com/vityabond/hopebilling/archive/master.zip
         remote_src: yes
-        creates: /var/www/hopebilling-master
         dest: /var/www
         group: apache
         owner: apache
-    - name: Creating html symlink
+    - name: Weird fix for weird thing
+      copy:
+        content: ''
+        dest: /var/www/hopebilling-master/app/config/global.config
+    - name: Setting required permissions
       file:
-        src: /var/www/hopebilling-master
-        dest: /var/www/html
-        state: link
-        force: yes
+        path: /var/www/hopebilling-master/{{ item }}
+        mode: a+w
+      with_items:
+        - app/config
+        - app/config/global.config
+        - app/config/payments.config
+        - app/config/sms-gateway.config
+        - storage
+    - name: Generating Apache2 virtual host config
+      copy:
+        src: httpd.conf
+        dest: /etc/httpd/conf.d/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
+      notify: Restarting Apache2 
+    # - name: Creating html symlink
+    #   file:
+    #     src: /var/www/hopebilling-master
+    #     dest: /var/www/html
+    #     state: link
+    #     force: yes
     - name: Enabling short_open_tag in php.ini
       lineinfile:
         path: /etc/php.ini
         regexp: '^short_open_tag'
         state: absent
-      notify: Restart Apache2
-    - name: Adding info.php for debug
-      copy:
-        content: <?php phpinfo(); ?>
-        dest: /var/www/html/info.php
-        group: apache
-        owner: apache
+      notify: Restarting Apache2
+    # - name: Adding info.php for debug
+    #   copy:
+    #     content: <?php phpinfo(); ?>
+    #     dest: /var/www/html/info.php
+    #     group: apache
+    #     owner: apache
 
   handlers:
-    - name: Restart Apache2
+    - name: Restarting Apache2
       systemd:
         unit: httpd
         state: restarted
         enabled: yes
-    - name: Restart MySQL
+    - name: Restarting MySQL
       systemd:
         unit: mysqld
         state: restarted
@@ -142,9 +165,9 @@
         dest: /etc/nginx/sites-enabled/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
         state: link
         force: yes
-    - name: Generating virtual host configuration
+    - name: Generating nginx virtual host config
       template:
-        src: hopebilling.conf.j2
+        src: nginx.conf.j2
         dest: /etc/nginx/sites-available/{{ hostvars[groups['hopebilling'] | first]['ansible_nodename'] }}
       notify: Reload nginx
       
@@ -153,6 +176,3 @@
       systemd:
         unit: nginx
         state: reloaded
-
-
-###### сделать так, чтобы скачанный биллинг нормально распаковывался (или симлинкался?) в /var/www/html
