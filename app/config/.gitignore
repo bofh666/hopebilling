@@ -1,5 +1,5 @@
 *
 !.gitignore
-!/app/config/global.config
-!/app/config/payments.config
-!/app/config/sms-gateway.config
+!global.config
+!payments.config
+!sms-gateway.config
