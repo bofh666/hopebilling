@@ -1,5 +1,5 @@
 ---
-- name: Ensure Python is in place on CentOS 8 host
+- name: Ensure Python is in place on CentOS 8 fresh install
   hosts: hopebilling
   gather_facts: no
   strategy: linear
@@ -7,7 +7,7 @@
     - raw: dnf -y install python36   # Python 3.8 won't work! It's CentOS 8 specific at the moment of writing
     - raw: alternatives --set python /usr/bin/python3
 
-- name: Install HopeBilling on CentOS 8 host
+- name: Install HopeBilling on CentOS 8 fresh install
   hosts: hopebilling
   vars:
     percona_release_url: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
@@ -21,6 +21,7 @@
           64623564306537373038616364376235306330363434626535666565663839353531
     remi_release_url: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
     remi_php_release: 7.4
+    hopebilling_url: https://github.com/bofh666/hopebilling/archive/master.zip
   tasks:
     - name: Installing Apache2
       dnf:
@@ -106,31 +107,32 @@
         state: present
     - name: Downloading and unpacking HopeBilling
       unarchive:
-        src: https://github.com/vityabond/hopebilling/archive/master.zip
+        src: "{{ hopebilling_url }}"
         remote_src: yes
         dest: /var/www
         keep_newer: yes
         group: apache
         owner: apache
         creates: /var/www/hopebilling-master
-      register: unarchive
-    - debug:
-        var: unarchive
-    - name: Weird fix for weird thing
-      copy:
-        content: ''
-        dest: /var/www/hopebilling-master/app/config/global.config
-      when: unarchive.skipped is not defined
+    #   register: unarchive
+    # - name: Weird fix for weird thing
+    #   copy:
+    #     content: ''
+    #     dest: /var/www/hopebilling-master/app/config/global.config
+    #   when: unarchive.skipped is not defined
     - name: Some SELinux magic
       command: chcon -t httpd_sys_content_t /var/www/html -R
     - name: Some more SELinux magic
       command: chcon -t httpd_sys_rw_content_t /var/www/html/{{ item }}
       with_items:
         - app/config
-        - app/config/global.config
-        - app/config/payments.config
-        - app/config/sms-gateway.config
+        # - app/config/global.config
+        # - app/config/payments.config
+        # - app/config/sms-gateway.config
+        - logs
         - storage
+    - name: Even more SELinux magic
+      command: setsebool -P httpd_can_network_connect on
     - name: Updating Apache2 config to allow .htaccess
       replace:
         path: /etc/httpd/conf/httpd.conf
@@ -149,8 +151,6 @@
         regexp: '^short_open_tag'
         state: absent
       notify: Restarting Apache2
-    - name: Setting SELinux boolean to allow Apache2 outbound connections
-      command: setsebool -P httpd_can_network_connect on
 
   handlers:
     - name: Restarting Apache2
