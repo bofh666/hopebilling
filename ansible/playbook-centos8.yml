@@ -114,12 +114,6 @@
         group: apache
         owner: apache
         creates: /var/www/hopebilling-master
-    #   register: unarchive
-    # - name: Weird fix for weird thing
-    #   copy:
-    #     content: ''
-    #     dest: /var/www/hopebilling-master/app/config/global.config
-    #   when: unarchive.skipped is not defined
     - name: Some SELinux magic
       command: chcon -t httpd_sys_content_t /var/www/html -R
     - name: Some more SELinux magic
