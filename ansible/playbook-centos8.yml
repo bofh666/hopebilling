@@ -112,6 +112,7 @@
         keep_newer: yes
         group: apache
         owner: apache
+        creates: /var/www/hopebilling-master
     - name: Weird fix for weird thing
       copy:
         content: ''
