@@ -139,6 +139,8 @@
         regexp: '^short_open_tag'
         state: absent
       notify: Restarting Apache2
+    - name: Setting SELinux boolean to allow Apache2 outbound connections
+      command: setsebool -P httpd_can_network_connect on
 
   handlers:
     - name: Restarting Apache2
