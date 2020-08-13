@@ -126,10 +126,11 @@
       command: chcon -t httpd_sys_rw_content_t /var/www/html/{{ item }}
       with_items:
         - app/config
+        - app/config/global.config
+        - app/config/payments.config
+        - app/config/sms-gateway.config
         - app/logs
-        # - app/config/global.config
-        # - app/config/payments.config
-        # - app/config/sms-gateway.config
+        - app/logs/log.txt
         - storage
     - name: Even more SELinux magic
       command: setsebool -P httpd_can_network_connect on
