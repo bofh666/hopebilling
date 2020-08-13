@@ -27,6 +27,11 @@
         name: httpd
         state: present
         update_cache: yes
+    - name: Ensuring firewalld is enabled and started
+      systemd:
+        unit: firewalld
+        state: started
+        enabled: yes
     - name: Allowing HTTP traffic
       firewalld:
         immediate: yes
